@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Serverless URL Shortener</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<h1>🔗 Serverless URL Shortener</h1>
+
+<input type="text" id="urlInput" placeholder="Enter long URL">
+<button onclick="shortenURL()">Shorten</button>
+
+<p id="result"></p>
+
+<hr>
+
+<h2>📊 Analytics</h2>
+<button onclick="loadAnalytics()">Refresh</button>
+
+<table border="1">
+<thead>
+<tr>
+<th>Short ID</th>
+<th>Original URL</th>
+<th>Clicks</th>
+</tr>
+</thead>
+<tbody id="analyticsTable"></tbody>
+</table>
+
+<script>
+
+const apiBase = "https://yibmv0wh53.execute-api.ap-south-1.amazonaws.com/prod";
+
+async function shortenURL() {
+
+    const originalUrl = document.getElementById("urlInput").value;
+
+    const response = await fetch(apiBase + "/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: originalUrl })
+    });
+
+    const data = await response.json();
+
+    const shortUrl = apiBase + "/" + data.shortId;
+
+    document.getElementById("result").innerHTML =
+        `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+}
+
+async function loadAnalytics() {
+
+    const response = await fetch(apiBase + "/analytics");
+    const data = await response.json();
+
+    const table = document.getElementById("analyticsTable");
+    table.innerHTML = "";
+
+    data.forEach(item => {
+        table.innerHTML += `
+        <tr>
+            <td>${item.shortId}</td>
+            <td>${item.originalUrl}</td>
+            <td>${item.clicks}</td>
+        </tr>`;
+    });
+}
+
+</script>
+
+</body>
+</html>
